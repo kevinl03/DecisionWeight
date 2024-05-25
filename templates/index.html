@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Decision Making</title>
+</head>
+<body>
+    <h1>Goals</h1>
+    <form action="/add_goal" method="post">
+        <input type="text" name="name" placeholder="Goal name" required>
+        <button type="submit">Add Goal</button>
+    </form>
+    <ul>
+        {% for goal in goals %}
+            <li>{{ goal[1] }}</li>
+        {% endfor %}
+    </ul>
+
+    <h1>Decisions</h1>
+    <form action="/add_decision" method="post">
+        <input type="text" name="name" placeholder="Decision name" required>
+        <button type="submit">Add Decision</button>
+    </form>
+    <ul>
+        {% for decision in decisions %}
+            <li>{{ decision[1] }}</li>
+        {% endfor %}
+    </ul>
+
+    <h1>Rate Decision</h1>
+    <form action="/rate_decision" method="post">
+        <select name="decision_id">
+            {% for decision in decisions %}
+                <option value="{{ decision[0] }}">{{ decision[1] }}</option>
+            {% endfor %}
+        </select>
+        <select name="goal_id">
+            {% for goal in goals %}
+                <option value="{{ goal[0] }}">{{ goal[1] }}</option>
+            {% endfor %}
+        </select>
+        <input type="number" name="score" placeholder="Score" required>
+        <button type="submit">Rate Decision</button>
+    </form>
+</body>
+</html>
