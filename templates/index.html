@@ -57,6 +57,11 @@
             width: 50px;
             margin-left: 10px;
         }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
     </style>
 </head>
 <body>
@@ -66,23 +71,29 @@
             <input type="text" name="name" placeholder="Decision name" required>
             {% for goal in goals %}
                 <div class="goal-widget">
-                    <span>{{ goal[1] }}</span>
+                    <span>{{ goal[1] }} (Weight: {{ goal[2] }})</span>
                     <input type="number" id="score_{{ goal[0] }}" name="score_{{ goal[0] }}" placeholder="Score" required>
                 </div>
             {% endfor %}
             <button type="submit">Weigh Decision</button>
         </form>
+        {% if result is not none %}
+            <div class="result">
+                <strong>Decision Score:</strong> {{ result }}
+            </div>
+        {% endif %}
     </div>
     <div class="container" id="goals">
         <h1>Goals</h1>
         <form action="/add_goal" method="post">
             <input type="text" name="name" placeholder="Goal name" required>
+            <input type="number" name="weight" placeholder="Weight" required>
             <button type="submit">Add Goal</button>
         </form>
         <ul>
             {% for goal in goals %}
                 <li class="goal-widget">
-                    <span>{{ goal[1] }}</span>
+                    <span>{{ goal[1] }} (Weight: {{ goal[2] }})</span>
                 </li>
             {% endfor %}
         </ul>

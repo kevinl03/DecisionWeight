@@ -9,7 +9,8 @@ def init_db():
     c.execute('''
         CREATE TABLE IF NOT EXISTS goals (
             id INTEGER PRIMARY KEY,
-            name TEXT NOT NULL
+            name TEXT NOT NULL,
+            weight INTEGER NOT NULL
         )
     ''')
     c.execute('''
@@ -40,39 +41,60 @@ def index():
     c.execute('SELECT * FROM decisions')
     decisions = c.fetchall()
     conn.close()
-    return render_template('index.html', goals=goals, decisions=decisions)
+    return render_template('index.html', goals=goals, decisions=decisions, result=None)
 
 @app.route('/add_goal', methods=['POST'])
 def add_goal():
     name = request.form['name']
+    weight = request.form['weight']
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    c.execute('INSERT INTO goals (name) VALUES (?)', (name,))
+    c.execute('INSERT INTO goals (name, weight) VALUES (?, ?)', (name, weight))
     conn.commit()
     conn.close()
     return redirect(url_for('index'))
 
 @app.route('/add_decision', methods=['POST'])
 def add_decision():
-    name = request.form['name']
+    decision_name = request.form['name']
+    scores = {key: int(value) for key, value in request.form.items() if key.startswith('score_')}
+    
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    c.execute('INSERT INTO decisions (name) VALUES (?)', (name,))
+    c.execute('INSERT INTO decisions (name) VALUES (?)', (decision_name,))
+    decision_id = c.lastrowid
+    for goal_id, score in scores.items():
+        c.execute('INSERT INTO ratings (decision_id, goal_id, score) VALUES (?, ?, ?)', (decision_id, goal_id.split('_')[1], score))
+    
+    c.execute('SELECT MAX(weight) FROM goals')
+    max_weight = c.fetchone()[0]
+    
+    total_score = 0
+    for goal_id, score in scores.items():
+        c.execute('SELECT weight FROM goals WHERE id = ?', (goal_id.split('_')[1],))
+        weight = c.fetchone()[0]
+        total_score += (weight / max_weight) * score
+    
     conn.commit()
     conn.close()
-    return redirect(url_for('index'))
+    
+    return render_template('index.html', goals=get_goals(), decisions=get_decisions(), result=total_score)
 
-@app.route('/rate_decision', methods=['POST'])
-def rate_decision():
-    decision_id = request.form['decision_id']
-    goal_id = request.form['goal_id']
-    score = request.form['score']
+def get_goals():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    c.execute('INSERT INTO ratings (decision_id, goal_id, score) VALUES (?, ?, ?)', (decision_id, goal_id, score))
-    conn.commit()
+    c.execute('SELECT * FROM goals')
+    goals = c.fetchall()
     conn.close()
-    return redirect(url_for('index'))
+    return goals
+
+def get_decisions():
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute('SELECT * FROM decisions')
+    decisions = c.fetchall()
+    conn.close()
+    return decisions
 
 if __name__ == '__main__':
     init_db()
