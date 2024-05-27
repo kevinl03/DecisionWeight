@@ -53,9 +53,8 @@
             justify-content: space-between;
             align-items: center;
         }
-        .goal-widget input[type="number"] {
-            width: 50px;
-            margin-left: 10px;
+        .goal-widget select {
+            width: 150px;
         }
         .result {
             margin-top: 20px;
@@ -72,7 +71,11 @@
             {% for goal in goals %}
                 <div class="goal-widget">
                     <span>{{ goal[1] }} (Weight: {{ goal[2] }})</span>
-                    <input type="number" id="score_{{ goal[0] }}" name="score_{{ goal[0] }}" placeholder="Score" required>
+                    <select id="score_{{ goal[0] }}" name="score_{{ goal[0] }}" required>
+                        <option value="positive">Positive</option>
+                        <option value="neutral">Neutral</option>
+                        <option value="negative">Negative</option>
+                    </select>
                 </div>
             {% endfor %}
             <button type="submit">Weigh Decision</button>

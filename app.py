@@ -57,7 +57,7 @@ def add_goal():
 @app.route('/add_decision', methods=['POST'])
 def add_decision():
     decision_name = request.form['name']
-    scores = {key: int(value) for key, value in request.form.items() if key.startswith('score_')}
+    scores = {key: value for key, value in request.form.items() if key.startswith('score_')}
     
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
@@ -73,7 +73,16 @@ def add_decision():
     for goal_id, score in scores.items():
         c.execute('SELECT weight FROM goals WHERE id = ?', (goal_id.split('_')[1],))
         weight = c.fetchone()[0]
-        total_score += (weight / max_weight) * score
+
+        #Having a positive, negative, or neutral correlation to simplify choosing weight score
+        #Because right now I have to choose weight, and score. Having pos, neg, neutral 
+        #simplifies bias slightly, and only requires user to choose goal weight, and decision can
+        #either bring it closer or further, but undefined for now by how much.
+        score_value = {'positive': 1, 'neutral': 0, 'negative': -1}[score]
+        total_score += (weight / max_weight) * score_value
+
+        #For choosing a score value for a goal
+        #total_score += (weight / max_weight) * score
     
     conn.commit()
     conn.close()
