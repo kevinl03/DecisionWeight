@@ -21,6 +21,9 @@
         }
         ul li {
             margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         form {
             margin-bottom: 20px;
@@ -55,6 +58,16 @@
         }
         .goal-widget select {
             width: 150px;
+        }
+        .goal-widget .delete-button {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .goal-widget .delete-button:hover {
+            background-color: #ff1a1a;
         }
         .result {
             margin-top: 20px;
@@ -97,6 +110,9 @@
             {% for goal in goals %}
                 <li class="goal-widget">
                     <span>{{ goal[1] }} (Weight: {{ goal[2] }})</span>
+                    <form action="/delete_goal/{{ goal[0] }}" method="post" style="margin: 0;">
+                        <button type="submit" class="delete-button">Delete</button>
+                    </form>
                 </li>
             {% endfor %}
         </ul>

@@ -89,6 +89,15 @@ def add_decision():
     
     return render_template('index.html', goals=get_goals(), decisions=get_decisions(), result=total_score)
 
+@app.route('/delete_goal/<int:goal_id>', methods=['POST'])
+def delete_goal(goal_id):
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute('DELETE FROM goals WHERE id = ?', (goal_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('index'))
+
 def get_goals():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
