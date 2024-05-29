@@ -34,13 +34,8 @@ def init_db():
 
 @app.route('/')
 def index():
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
-    c.execute('SELECT * FROM goals')
-    goals = c.fetchall()
-    c.execute('SELECT * FROM decisions')
-    decisions = c.fetchall()
-    conn.close()
+    goals = get_goals()
+    decisions = get_decisions()
     return render_template('index.html', goals=goals, decisions=decisions, result=None)
 
 @app.route('/add_goal', methods=['POST'])
@@ -50,6 +45,16 @@ def add_goal():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     c.execute('INSERT INTO goals (name, weight) VALUES (?, ?)', (name, weight))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('index'))
+
+@app.route('/edit_goal/<int:goal_id>', methods=['POST'])
+def edit_goal(goal_id):
+    new_weight = request.form['weight']
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute('UPDATE goals SET weight = ? WHERE id = ?', (new_weight, goal_id))
     conn.commit()
     conn.close()
     return redirect(url_for('index'))
@@ -88,15 +93,6 @@ def add_decision():
     conn.close()
     
     return render_template('index.html', goals=get_goals(), decisions=get_decisions(), result=total_score)
-
-@app.route('/delete_goal/<int:goal_id>', methods=['POST'])
-def delete_goal(goal_id):
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
-    c.execute('DELETE FROM goals WHERE id = ?', (goal_id,))
-    conn.commit()
-    conn.close()
-    return redirect(url_for('index'))
 
 def get_goals():
     conn = sqlite3.connect('database.db')

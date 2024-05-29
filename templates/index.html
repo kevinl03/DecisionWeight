@@ -59,15 +59,27 @@
         .goal-widget select {
             width: 150px;
         }
-        .goal-widget .delete-button {
-            background-color: #ff4d4d;
+        .goal-widget .edit-button {
+            background-color: #4CAF50;
             color: white;
             border: none;
             padding: 5px 10px;
             cursor: pointer;
+            margin-left: 10px;
         }
-        .goal-widget .delete-button:hover {
-            background-color: #ff1a1a;
+        .goal-widget .edit-button:hover {
+            background-color: #45a049;
+        }
+        .goal-widget .save-button {
+            background-color: #FFA500;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .goal-widget .save-button:hover {
+            background-color: #FF8C00;
         }
         .result {
             margin-top: 20px;
@@ -110,12 +122,21 @@
             {% for goal in goals %}
                 <li class="goal-widget">
                     <span>{{ goal[1] }} (Weight: {{ goal[2] }})</span>
-                    <form action="/delete_goal/{{ goal[0] }}" method="post" style="margin: 0;">
-                        <button type="submit" class="delete-button">Delete</button>
+                    <button class="edit-button" onclick="editGoal({{ goal[0] }}, {{ goal[2] }})">Edit</button>
+                    <form action="/edit_goal/{{ goal[0] }}" method="post" class="edit-form" style="display: none;">
+                        <input type="number" name="weight" placeholder="New Weight" required>
+                        <button type="submit" class="save-button">Save</button>
                     </form>
                 </li>
             {% endfor %}
         </ul>
     </div>
+    <script>
+        function editGoal(goalId, currentWeight) {
+            const editForm = document.querySelector(`form[action="/edit_goal/${goalId}"]`);
+            editForm.querySelector('input[name="weight"]').value = currentWeight;
+            editForm.style.display = 'block';
+        }
+    </script>
 </body>
 </html>
