@@ -32,6 +32,18 @@ def init_db():
     conn.commit()
     conn.close()
 
+    # Initialize archived goals database
+    conn = sqlite3.connect('archived_goals.db')
+    c = conn.cursor()
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS archived_goals (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
 @app.route('/')
 def index():
     goals = get_goals()
@@ -57,6 +69,28 @@ def edit_goal(goal_id):
     c.execute('UPDATE goals SET weight = ? WHERE id = ?', (new_weight, goal_id))
     conn.commit()
     conn.close()
+    return redirect(url_for('index'))
+
+@app.route('/archive_goal/<int:goal_id>', methods=['POST'])
+def archive_goal(goal_id):
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute('SELECT name FROM goals WHERE id = ?', (goal_id,))
+    goal_name = c.fetchone()[0]
+    conn.close()
+
+    conn = sqlite3.connect('archived_goals.db')
+    c = conn.cursor()
+    c.execute('INSERT INTO archived_goals (name) VALUES (?)', (goal_name,))
+    conn.commit()
+    conn.close()
+
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute('DELETE FROM goals WHERE id = ?', (goal_id,))
+    conn.commit()
+    conn.close()
+
     return redirect(url_for('index'))
 
 @app.route('/add_decision', methods=['POST'])
