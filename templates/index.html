@@ -59,16 +59,18 @@
         .goal-widget select {
             width: 150px;
         }
-        .goal-widget .edit-button {
-            background-color: #4CAF50;
+        .goal-widget .edit-button,
+        .goal-widget .archive-button {
+            background-color: green;
             color: white;
             border: none;
             padding: 5px 10px;
             cursor: pointer;
-            margin-left: 10px;
+            margin-left: 10x;
         }
-        .goal-widget .edit-button:hover {
-            background-color: #45a049;
+        .goal-widget .edit-button:hover,
+        .goal-widget .archive-button:hover {
+            background-color: green;
         }
         .goal-widget .save-button {
             background-color: #FFA500;
@@ -123,6 +125,9 @@
                 <li class="goal-widget">
                     <span>{{ goal[1] }} (Weight: {{ goal[2] }})</span>
                     <button class="edit-button" onclick="editGoal({{ goal[0] }}, {{ goal[2] }})">Edit</button>
+                    <form action="/archive_goal/{{ goal[0] }}" method="post" style="margin: 0;">
+                        <button type="submit" class="archive-button">Archive</button>
+                    </form>
                     <form action="/edit_goal/{{ goal[0] }}" method="post" class="edit-form" style="display: none;">
                         <input type="number" name="weight" placeholder="New Weight" required>
                         <button type="submit" class="save-button">Save</button>
