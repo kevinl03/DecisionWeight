@@ -61,16 +61,16 @@
         }
         .goal-widget .edit-button,
         .goal-widget .archive-button {
-            background-color: green;
+            background-color: #4CAF50;
             color: white;
             border: none;
             padding: 5px 10px;
             cursor: pointer;
-            margin-left: 10x;
+            margin-left: 10px;
         }
         .goal-widget .edit-button:hover,
         .goal-widget .archive-button:hover {
-            background-color: green;
+            background-color: #45a049;
         }
         .goal-widget .save-button {
             background-color: #FFA500;
@@ -82,6 +82,18 @@
         }
         .goal-widget .save-button:hover {
             background-color: #FF8C00;
+        }
+        .goal-widget .more-options {
+            background-color: transparent;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .goal-widget .more-options:hover {
+            color: #888;
+        }
+        .hidden {
+            display: none;
         }
         .result {
             margin-top: 20px;
@@ -124,11 +136,14 @@
             {% for goal in goals %}
                 <li class="goal-widget">
                     <span>{{ goal[1] }} (Weight: {{ goal[2] }})</span>
-                    <button class="edit-button" onclick="editGoal({{ goal[0] }}, {{ goal[2] }})">Edit</button>
-                    <form action="/archive_goal/{{ goal[0] }}" method="post" style="margin: 0;">
-                        <button type="submit" class="archive-button">Archive</button>
-                    </form>
-                    <form action="/edit_goal/{{ goal[0] }}" method="post" class="edit-form" style="display: none;">
+                    <button class="more-options" onclick="toggleOptions({{ goal[0] }})">...</button>
+                    <div id="options-{{ goal[0] }}" class="hidden">
+                        <button class="edit-button" onclick="editGoal({{ goal[0] }}, {{ goal[2] }})">Edit</button>
+                        <form action="/archive_goal/{{ goal[0] }}" method="post" style="margin: 0;">
+                            <button type="submit" class="archive-button">Archive</button>
+                        </form>
+                    </div>
+                    <form action="/edit_goal/{{ goal[0] }}" method="post" class="edit-form hidden">
                         <input type="number" name="weight" placeholder="New Weight" required>
                         <button type="submit" class="save-button">Save</button>
                     </form>
@@ -137,10 +152,15 @@
         </ul>
     </div>
     <script>
+        function toggleOptions(goalId) {
+            const optionsDiv = document.getElementById(`options-${goalId}`);
+            optionsDiv.classList.toggle('hidden');
+        }
+
         function editGoal(goalId, currentWeight) {
             const editForm = document.querySelector(`form[action="/edit_goal/${goalId}"]`);
             editForm.querySelector('input[name="weight"]').value = currentWeight;
-            editForm.style.display = 'block';
+            editForm.classList.remove('hidden');
         }
     </script>
 </body>
