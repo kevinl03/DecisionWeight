@@ -38,7 +38,8 @@ def init_db():
     c.execute('''
         CREATE TABLE IF NOT EXISTS archived_goals (
             id INTEGER PRIMARY KEY,
-            name TEXT NOT NULL
+            name TEXT NOT NULL,
+            weight INTEGER NOT NULL
         )
     ''')
     conn.commit()
@@ -75,13 +76,14 @@ def edit_goal(goal_id):
 def archive_goal(goal_id):
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    c.execute('SELECT name FROM goals WHERE id = ?', (goal_id,))
-    goal_name = c.fetchone()[0]
+    c.execute('SELECT name, weight FROM goals WHERE id = ?', (goal_id,))
+    goal = c.fetchone()
+    goal_name, goal_weight = goal
     conn.close()
 
     conn = sqlite3.connect('archived_goals.db')
     c = conn.cursor()
-    c.execute('INSERT INTO archived_goals (name) VALUES (?)', (goal_name,))
+    c.execute('INSERT INTO archived_goals (name, weight) VALUES (?, ?)', (goal_name, goal_weight))
     conn.commit()
     conn.close()
 
