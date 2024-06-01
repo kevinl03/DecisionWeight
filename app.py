@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 import os
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -12,7 +13,8 @@ def init_db():
         CREATE TABLE IF NOT EXISTS goals (
             id INTEGER PRIMARY KEY,
             name TEXT NOT NULL,
-            weight INTEGER NOT NULL
+            weight INTEGER NOT NULL,
+            timestamp TEXT NOT NULL
         )
     ''')
     c.execute('''
@@ -41,7 +43,8 @@ def init_db():
         CREATE TABLE IF NOT EXISTS archived_goals (
             id INTEGER PRIMARY KEY,
             name TEXT NOT NULL,
-            weight INTEGER NOT NULL
+            weight INTEGER NOT NULL,
+            timestamp TEXT NOT NULL
         )
     ''')
     conn.commit()
@@ -62,9 +65,10 @@ def archived():
 def add_goal():
     name = request.form['name']
     weight = request.form['weight']
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    c.execute('INSERT INTO goals (name, weight) VALUES (?, ?)', (name, weight))
+    c.execute('INSERT INTO goals (name, weight, timestamp) VALUES (?, ?, ?)', (name, weight, timestamp))
     conn.commit()
     conn.close()
     return redirect(url_for('index'))
@@ -72,25 +76,26 @@ def add_goal():
 @app.route('/edit_goal/<int:goal_id>', methods=['POST'])
 def edit_goal(goal_id):
     new_weight = request.form['weight']
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     
     # Archive the current state of the goal
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    c.execute('SELECT name, weight FROM goals WHERE id = ?', (goal_id,))
+    c.execute('SELECT name, weight, timestamp FROM goals WHERE id = ?', (goal_id,))
     goal = c.fetchone()
-    goal_name, goal_weight = goal
+    goal_name, goal_weight, goal_timestamp = goal
     conn.close()
 
     conn = sqlite3.connect('archived_goals.db')
     c = conn.cursor()
-    c.execute('INSERT INTO archived_goals (name, weight) VALUES (?, ?)', (goal_name, goal_weight))
+    c.execute('INSERT INTO archived_goals (name, weight, timestamp) VALUES (?, ?, ?)', (goal_name, goal_weight, goal_timestamp))
     conn.commit()
     conn.close()
 
-    # Update the goal with the new weight
+    # Update the goal with the new weight and timestamp
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    c.execute('UPDATE goals SET weight = ? WHERE id = ?', (new_weight, goal_id))
+    c.execute('UPDATE goals SET weight = ?, timestamp = ? WHERE id = ?', (new_weight, timestamp, goal_id))
     conn.commit()
     conn.close()
     
@@ -100,14 +105,14 @@ def edit_goal(goal_id):
 def archive_goal(goal_id):
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    c.execute('SELECT name, weight FROM goals WHERE id = ?', (goal_id,))
+    c.execute('SELECT name, weight, timestamp FROM goals WHERE id = ?', (goal_id,))
     goal = c.fetchone()
-    goal_name, goal_weight = goal
+    goal_name, goal_weight, goal_timestamp = goal
     conn.close()
 
     conn = sqlite3.connect('archived_goals.db')
     c = conn.cursor()
-    c.execute('INSERT INTO archived_goals (name, weight) VALUES (?, ?)', (goal_name, goal_weight))
+    c.execute('INSERT INTO archived_goals (name, weight, timestamp) VALUES (?, ?, ?)', (goal_name, goal_weight, goal_timestamp))
     conn.commit()
     conn.close()
 
