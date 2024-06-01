@@ -6,11 +6,19 @@
         body {
             font-family: Arial, sans-serif;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            align-items: center;
             padding: 20px;
+        }
+        .main-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1200px;
         }
         .container {
             width: 45%;
+            margin-bottom: 20px;
         }
         h1 {
             text-align: center;
@@ -36,15 +44,21 @@
             margin: 5px 0;
             box-sizing: border-box;
         }
-        form button {
+        form button,
+        .nav-button {
             width: 100%;
             padding: 10px;
             background-color: #4CAF50;
             color: white;
             border: none;
             cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 10px;
         }
-        form button:hover {
+        form button:hover,
+        .nav-button:hover {
             background-color: #45a049;
         }
         .goal-widget {
@@ -103,53 +117,56 @@
     </style>
 </head>
 <body>
-    <div class="container" id="decisions">
-        <h1>Decisions</h1>
-        <form action="/add_decision" method="post">
-            <input type="text" name="name" placeholder="Decision name" required>
-            {% for goal in goals %}
-                <div class="goal-widget">
-                    <span>{{ goal[1] }} (Weight: {{ goal[2] }})</span>
-                    <select id="score_{{ goal[0] }}" name="score_{{ goal[0] }}" required>
-                        <option value="positive">Positive</option>
-                        <option value="neutral">Neutral</option>
-                        <option value="negative">Negative</option>
-                    </select>
-                </div>
-            {% endfor %}
-            <button type="submit">Weigh Decision</button>
-        </form>
-        {% if result is not none %}
-            <div class="result">
-                <strong>Decision Score:</strong> {{ result }}
-            </div>
-        {% endif %}
-    </div>
-    <div class="container" id="goals">
-        <h1>Goals</h1>
-        <form action="/add_goal" method="post">
-            <input type="text" name="name" placeholder="Goal name" required>
-            <input type="number" name="weight" placeholder="Weight" required>
-            <button type="submit">Add Goal</button>
-        </form>
-        <ul>
-            {% for goal in goals %}
-                <li class="goal-widget">
-                    <span>{{ goal[1] }} (Weight: {{ goal[2] }})</span>
-                    <button class="more-options" onclick="toggleOptions({{ goal[0] }})">...</button>
-                    <div id="options-{{ goal[0] }}" class="hidden">
-                        <button class="edit-button" onclick="editGoal({{ goal[0] }}, {{ goal[2] }})">Edit</button>
-                        <form action="/archive_goal/{{ goal[0] }}" method="post" style="margin: 0;">
-                            <button type="submit" class="archive-button">Archive</button>
-                        </form>
+    <a href="{{ url_for('archived') }}" class="nav-button">View Archived Goals</a>
+    <div class="main-container">
+        <div class="container" id="decisions">
+            <h1>Decisions</h1>
+            <form action="/add_decision" method="post">
+                <input type="text" name="name" placeholder="Decision name" required>
+                {% for goal in goals %}
+                    <div class="goal-widget">
+                        <span>{{ goal[1] }} (Weight: {{ goal[2] }})</span>
+                        <select id="score_{{ goal[0] }}" name="score_{{ goal[0] }}" required>
+                            <option value="positive">Positive</option>
+                            <option value="neutral">Neutral</option>
+                            <option value="negative">Negative</option>
+                        </select>
                     </div>
-                    <form action="/edit_goal/{{ goal[0] }}" method="post" class="edit-form hidden">
-                        <input type="number" name="weight" placeholder="New Weight" required>
-                        <button type="submit" class="save-button">Save</button>
-                    </form>
-                </li>
-            {% endfor %}
-        </ul>
+                {% endfor %}
+                <button type="submit">Weigh Decision</button>
+            </form>
+            {% if result is not none %}
+                <div class="result">
+                    <strong>Decision Score:</strong> {{ result }}
+                </div>
+            {% endif %}
+        </div>
+        <div class="container" id="goals">
+            <h1>Goals</h1>
+            <form action="/add_goal" method="post">
+                <input type="text" name="name" placeholder="Goal name" required>
+                <input type="number" name="weight" placeholder="Weight" required>
+                <button type="submit">Add Goal</button>
+            </form>
+            <ul>
+                {% for goal in goals %}
+                    <li class="goal-widget">
+                        <span>{{ goal[1] }} (Weight: {{ goal[2] }})</span>
+                        <button class="more-options" onclick="toggleOptions({{ goal[0] }})">...</button>
+                        <div id="options-{{ goal[0] }}" class="hidden">
+                            <button class="edit-button" onclick="editGoal({{ goal[0] }}, {{ goal[2] }})">Edit</button>
+                            <form action="/archive_goal/{{ goal[0] }}" method="post" style="margin: 0;">
+                                <button type="submit" class="archive-button">Archive</button>
+                            </form>
+                        </div>
+                        <form action="/edit_goal/{{ goal[0] }}" method="post" class="edit-form hidden">
+                            <input type="number" name="weight" placeholder="New Weight" required>
+                            <button type="submit" class="save-button">Save</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
     <script>
         function toggleOptions(goalId) {

@@ -6,10 +6,13 @@
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .container {
             max-width: 800px;
-            margin: 0 auto;
+            width: 100%;
         }
         h1 {
             text-align: center;
@@ -24,7 +27,7 @@
             padding: 10px;
             background-color: #f9f9f9;
         }
-        .back-button {
+        .nav-button {
             display: block;
             margin: 20px auto;
             padding: 10px 20px;
@@ -34,12 +37,13 @@
             text-decoration: none;
             border-radius: 5px;
         }
-        .back-button:hover {
+        .nav-button:hover {
             background-color: #45a049;
         }
     </style>
 </head>
 <body>
+    <a href="{{ url_for('index') }}" class="nav-button">Back to Goals</a>
     <div class="container">
         <h1>Archived Goals</h1>
         <ul>
@@ -49,7 +53,6 @@
                 </li>
             {% endfor %}
         </ul>
-        <a href="{{ url_for('index') }}" class="back-button">Back to Goals</a>
     </div>
 </body>
 </html>
