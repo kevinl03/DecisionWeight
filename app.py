@@ -20,7 +20,8 @@ def init_db():
     c.execute('''
         CREATE TABLE IF NOT EXISTS decisions (
             id INTEGER PRIMARY KEY,
-            name TEXT NOT NULL
+            name TEXT NOT NULL,
+            timestamp TEXT NOT NULL
         )
     ''')
     c.execute('''
@@ -60,6 +61,11 @@ def index():
 def archived():
     archived_goals = get_archived_goals()
     return render_template('archived.html', archived_goals=archived_goals)
+
+@app.route('/previous_decisions')
+def previous_decisions():
+    decisions = get_previous_decisions()
+    return render_template('previous_decisions.html', decisions=decisions)
 
 @app.route('/add_goal', methods=['POST'])
 def add_goal():
@@ -128,10 +134,11 @@ def archive_goal(goal_id):
 def add_decision():
     decision_name = request.form['name']
     scores = {key: value for key, value in request.form.items() if key.startswith('score_')}
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    c.execute('INSERT INTO decisions (name) VALUES (?)', (decision_name,))
+    c.execute('INSERT INTO decisions (name, timestamp) VALUES (?, ?)', (decision_name, timestamp))
     decision_id = c.lastrowid
     for goal_id, score in scores.items():
         c.execute('INSERT INTO ratings (decision_id, goal_id, score) VALUES (?, ?, ?)', (decision_id, goal_id.split('_')[1], score))
@@ -171,6 +178,19 @@ def get_decisions():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     c.execute('SELECT * FROM decisions')
+    decisions = c.fetchall()
+    conn.close()
+    return decisions
+
+def get_previous_decisions():
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute('''
+        SELECT d.name, d.timestamp, r.goal_id, r.score, g.name, g.weight 
+        FROM decisions d 
+        JOIN ratings r ON d.id = r.decision_id 
+        JOIN goals g ON r.goal_id = g.id
+    ''')
     decisions = c.fetchall()
     conn.close()
     return decisions
