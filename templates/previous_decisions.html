@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Previous Decisions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        ul li {
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        .nav-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .nav-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('index') }}" class="nav-button">Back to Goals</a>
+    <div class="container">
+        <h1>Previous Decisions</h1>
+        <ul>
+            {% for decision in decisions %}
+                <li>
+                    <strong>Decision:</strong> {{ decision[0] }}<br>
+                    <strong>Timestamp:</strong> {{ decision[1] }}<br>
+                    <strong>Goal:</strong> {{ decision[4] }}<br>
+                    <strong>Weight:</strong> {{ decision[5] }}<br>
+                    <strong>Score:</strong> {{ decision[3] }}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>
