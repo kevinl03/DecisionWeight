@@ -21,17 +21,8 @@ def init_db():
         CREATE TABLE IF NOT EXISTS decisions (
             id INTEGER PRIMARY KEY,
             name TEXT NOT NULL,
-            timestamp TEXT NOT NULL
-        )
-    ''')
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS ratings (
-            id INTEGER PRIMARY KEY,
-            decision_id INTEGER,
-            goal_id INTEGER,
-            score INTEGER,
-            FOREIGN KEY (decision_id) REFERENCES decisions (id),
-            FOREIGN KEY (goal_id) REFERENCES goals (id)
+            timestamp TEXT NOT NULL,
+            total_score REAL NOT NULL
         )
     ''')
     conn.commit()
@@ -138,11 +129,6 @@ def add_decision():
     
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    c.execute('INSERT INTO decisions (name, timestamp) VALUES (?, ?)', (decision_name, timestamp))
-    decision_id = c.lastrowid
-    for goal_id, score in scores.items():
-        c.execute('INSERT INTO ratings (decision_id, goal_id, score) VALUES (?, ?, ?)', (decision_id, goal_id.split('_')[1], score))
-    
     c.execute('SELECT MAX(weight) FROM goals')
     max_weight = c.fetchone()[0]
     
@@ -153,6 +139,7 @@ def add_decision():
         score_value = {'positive': 1, 'neutral': 0, 'negative': -1}[score]
         total_score += (weight / max_weight) * score_value
     
+    c.execute('INSERT INTO decisions (name, timestamp, total_score) VALUES (?, ?, ?)', (decision_name, timestamp, total_score))
     conn.commit()
     conn.close()
     
@@ -185,12 +172,7 @@ def get_decisions():
 def get_previous_decisions():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    c.execute('''
-        SELECT d.name, d.timestamp, r.goal_id, r.score, g.name, g.weight 
-        FROM decisions d 
-        JOIN ratings r ON d.id = r.decision_id 
-        JOIN goals g ON r.goal_id = g.id
-    ''')
+    c.execute('SELECT name, timestamp, total_score FROM decisions')
     decisions = c.fetchall()
     conn.close()
     return decisions
