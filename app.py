@@ -159,7 +159,7 @@ def add_decision():
     conn.commit()
     conn.close()
     
-    return render_template('index.html', goals=get_goals(), decisions=get_decisions(), result=total_score)
+    return redirect(url_for('index'))
 
 @app.route('/save_template', methods=['POST'])
 def save_template():
