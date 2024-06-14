@@ -167,6 +167,21 @@
                     </li>
                 {% endfor %}
             </ul>
+            <form action="/save_template" method="post">
+                <input type="text" name="template_name" placeholder="Template name" required>
+                <button type="submit">Save Current Goals as Template</button>
+            </form>
+            <h2>Load Template</h2>
+            <ul>
+                {% for template in templates %}
+                    <li>
+                        <span>{{ template[1] }}</span>
+                        <form action="/load_template/{{ template[0] }}" method="post" style="display:inline;">
+                            <button type="submit">Load</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
         </div>
     </div>
     <script>
