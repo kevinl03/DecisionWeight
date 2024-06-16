@@ -40,6 +40,22 @@ def init_db():
             FOREIGN KEY (template_id) REFERENCES templates (id)
         )
     ''')
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS archived_templates (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL
+        )
+    ''')
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS archived_template_goals (
+            id INTEGER PRIMARY KEY,
+            archived_template_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            weight INTEGER NOT NULL,
+            timestamp TEXT NOT NULL,
+            FOREIGN KEY (archived_template_id) REFERENCES archived_templates (id)
+        )
+    ''')
     conn.commit()
     conn.close()
 
@@ -200,11 +216,29 @@ def load_template(template_id):
 def remove_template(template_id):
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
+
+    # Archive the template
+    c.execute('SELECT name FROM templates WHERE id = ?', (template_id,))
+    template = c.fetchone()
+    template_name = template[0]
+
+    c.execute('INSERT INTO archived_templates (name) VALUES (?)', (template_name,))
+    archived_template_id = c.lastrowid
+
+    c.execute('SELECT name, weight, timestamp FROM template_goals WHERE template_id = ?', (template_id,))
+    template_goals = c.fetchall()
+    for goal in template_goals:
+        c.execute('INSERT INTO archived_template_goals (archived_template_id, name, weight, timestamp) VALUES (?, ?, ?, ?)',
+                  (archived_template_id, goal[0], goal[1], goal[2]))
+
+    # Delete the template and its goals from the main database
     c.execute('DELETE FROM templates WHERE id = ?', (template_id,))
     c.execute('DELETE FROM template_goals WHERE template_id = ?', (template_id,))
+    
     conn.commit()
     conn.close()
     return redirect(url_for('index'))
+
 
 def get_goals():
     conn = sqlite3.connect('database.db')
@@ -245,6 +279,24 @@ def get_templates():
     templates = c.fetchall()
     conn.close()
     return templates
+
+@app.route('/archived_templates')
+def archived_templates():
+    archived_templates = get_archived_templates()
+    return render_template('archived_templates.html', archived_templates=archived_templates)
+
+def get_archived_templates():
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute('''
+        SELECT at.id, at.name, atg.name, atg.weight, atg.timestamp
+        FROM archived_templates at
+        LEFT JOIN archived_template_goals atg ON at.id = atg.archived_template_id
+    ''')
+    archived_templates = c.fetchall()
+    conn.close()
+    return archived_templates
+
 
 if __name__ == '__main__':
     init_db()
