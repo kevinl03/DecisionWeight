@@ -179,6 +179,9 @@
                         <form action="/load_template/{{ template[0] }}" method="post" style="display:inline;">
                             <button type="submit">Load</button>
                         </form>
+                        <form action="/remove_template/{{ template[0] }}" method="post" style="display:inline;">
+                            <button type="submit">Remove</button>
+                        </form>
                     </li>
                 {% endfor %}
             </ul>

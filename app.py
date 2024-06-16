@@ -196,6 +196,16 @@ def load_template(template_id):
     conn.close()
     return redirect(url_for('index'))
 
+@app.route('/remove_template/<int:template_id>', methods=['POST'])
+def remove_template(template_id):
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute('DELETE FROM templates WHERE id = ?', (template_id,))
+    c.execute('DELETE FROM template_goals WHERE template_id = ?', (template_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('index'))
+
 def get_goals():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
