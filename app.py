@@ -40,6 +40,15 @@ def init_db():
             FOREIGN KEY (template_id) REFERENCES templates (id)
         )
     ''')
+
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS archived_goals (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            weight INTEGER NOT NULL,
+            timestamp TEXT NOT NULL
+        )
+    ''')
     conn.commit()
     conn.close()
 
@@ -91,23 +100,15 @@ def edit_goal(goal_id):
     new_weight = request.form['weight']
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     
-    # Archive the current state of the goal
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
+    # First, fetch and archive the current state of the goal
     c.execute('SELECT name, weight, timestamp FROM goals WHERE id = ?', (goal_id,))
-    goal = c.fetchone()
-    goal_name, goal_weight, goal_timestamp = goal
-    conn.close()
-
-    conn = sqlite3.connect('archived_goals.db')
-    c = conn.cursor()
-    c.execute('INSERT INTO archived_goals (name, weight, timestamp) VALUES (?, ?, ?)', (goal_name, goal_weight, goal_timestamp))
-    conn.commit()
-    conn.close()
-
-    # Update the goal with the new weight and timestamp
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
+    goal_data = c.fetchone()
+    if goal_data:
+        c.execute('INSERT INTO archived_goals (name, weight, timestamp) VALUES (?, ?, ?)', (goal_data[0], goal_data[1], goal_data[2]))
+    
+    # Update the goal with the new weight
     c.execute('UPDATE goals SET weight = ?, timestamp = ? WHERE id = ?', (new_weight, timestamp, goal_id))
     conn.commit()
     conn.close()
@@ -215,9 +216,9 @@ def get_goals():
     return goals
 
 def get_archived_goals():
-    conn = sqlite3.connect('archived_goals.db')
+    conn = sqlite3.connect('database.db')  # Connect to the main database
     c = conn.cursor()
-    c.execute('SELECT * FROM archived_goals')
+    c.execute('SELECT * FROM archived_goals')  # Make sure 'archived_goals' is the correct table name
     archived_goals = c.fetchall()
     conn.close()
     return archived_goals
