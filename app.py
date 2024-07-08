@@ -77,7 +77,7 @@ def previous_decisions():
 @app.route('/add_goal', methods=['POST'])
 def add_goal():
     name = request.form['name']
-    weight = request.form['weight']
+    weight = request.form['weight']  # This captures the integer value from the slider
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     conn = sqlite3.connect('database.db')
     c = conn.cursor()

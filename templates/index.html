@@ -114,6 +114,36 @@
             font-size: 18px;
             color: #333;
         }
+        input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 15px;
+    border-radius: 5px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #4CAF50;
+    cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #4CAF50;
+    cursor: pointer;
+}
+
     </style>
 </head>
 <body>
@@ -144,11 +174,14 @@
         </div>
         <div class="container" id="goals">
             <h1>Goals</h1>
-            <form action="/add_goal" method="post">
-                <input type="text" name="name" placeholder="Goal name" required>
-                <input type="number" name="weight" placeholder="Weight" required>
-                <button type="submit">Add Goal</button>
-            </form>
+                <form action="/add_goal" method="post">
+                    <input type="text" name="name" placeholder="Goal name" required>
+                    <!-- Change weight input to a slider -->
+                    <input type="range" name="weight" min="0" max="100" value="50" oninput="this.nextElementSibling.value = this.value">
+                    <output>50</output>
+                    <button type="submit">Add Goal</button>
+                </form>
+
             <ul>
                 {% for goal in goals %}
                     <li class="goal-widget">
