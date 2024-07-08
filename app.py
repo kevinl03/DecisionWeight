@@ -153,29 +153,35 @@ def archive_goal(goal_id):
 
     return redirect(url_for('index'))
 
+import json
+
 @app.route('/add_decision', methods=['POST'])
 def add_decision():
     decision_name = request.form['name']
-    scores = {key: value for key, value in request.form.items() if key.startswith('score_')}
+    scores = json.loads(request.form['scores'])
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    
+
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     c.execute('SELECT MAX(weight) FROM goals')
     max_weight = c.fetchone()[0]
-    
+
     total_score = 0
-    for goal_id, score in scores.items():
-        c.execute('SELECT weight FROM goals WHERE id = ?', (goal_id.split('_')[1],))
+    for goal_id, column in scores.items():
+        c.execute('SELECT weight FROM goals WHERE id = ?', (goal_id,))
         weight = c.fetchone()[0]
-        score_value = {'positive': 1, 'neutral': 0, 'negative': -1}[score]
+        score_value = {'positive': 1, 'neutral': 0, 'negative': -1}[column]
         total_score += (weight / max_weight) * score_value
-    
+
     c.execute('INSERT INTO decisions (name, timestamp, total_score) VALUES (?, ?, ?)', (decision_name, timestamp, total_score))
     conn.commit()
     conn.close()
-    
-    return redirect(url_for('index'))
+
+    goals = get_goals()
+    decisions = get_decisions()
+    templates = get_templates()
+    return render_template('index.html', goals=goals, decisions=decisions, templates=templates, result=total_score)
+
 
 @app.route('/save_template', methods=['POST'])
 def save_template():

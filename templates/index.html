@@ -20,6 +20,25 @@
             width: 45%;
             margin-bottom: 20px;
         }
+        .drag-container {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+        }
+        .drop-column {
+            width: 30%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            min-height: 200px;
+        }
+        .goal-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            cursor: grab;
+        }
         h1 {
             text-align: center;
         }
@@ -123,18 +142,20 @@
     <div class="main-container">
         <div class="container" id="decisions">
             <h1>Decisions</h1>
-            <form action="/add_decision" method="post">
+            <form id="decision-form" action="/add_decision" method="post">
+                <input type="hidden" name="scores" id="scores">
                 <input type="text" name="name" placeholder="Decision name" required>
-                {% for goal in goals %}
-                    <div class="goal-widget">
-                        <span>{{ goal[1] }} (Weight: {{ goal[2] }})</span>
-                        <select id="score_{{ goal[0] }}" name="score_{{ goal[0] }}" required>
-                            <option value="positive">Positive</option>
-                            <option value="neutral">Neutral</option>
-                            <option value="negative">Negative</option>
-                        </select>
+                <div class="drag-container">
+                    <div class="drop-column" id="positive-column">
+                        <h3>Positive</h3>
                     </div>
-                {% endfor %}
+                    <div class="drop-column" id="neutral-column">
+                        <h3>Neutral</h3>
+                    </div>
+                    <div class="drop-column" id="negative-column">
+                        <h3>Negative</h3>
+                    </div>
+                </div>
                 <button type="submit">Weigh Decision</button>
             </form>
             {% if result is not none %}
@@ -150,55 +171,56 @@
                 <input type="number" name="weight" placeholder="Weight" required>
                 <button type="submit">Add Goal</button>
             </form>
-            <ul>
+            <ul id="goal-list">
                 {% for goal in goals %}
-                    <li class="goal-widget">
+                    <li class="goal-item" draggable="true" data-id="{{ goal[0] }}" data-weight="{{ goal[2] }}">
                         <span>{{ goal[1] }} (Weight: {{ goal[2] }})</span>
-                        <button class="more-options" onclick="toggleOptions({{ goal[0] }})">...</button>
-                        <div id="options-{{ goal[0] }}" class="hidden">
-                            <button class="edit-button" onclick="editGoal({{ goal[0] }}, {{ goal[2] }})">Edit</button>
-                            <form action="/archive_goal/{{ goal[0] }}" method="post" style="margin: 0;">
-                                <button type="submit" class="archive-button">Archive</button>
-                            </form>
-                        </div>
-                        <form action="/edit_goal/{{ goal[0] }}" method="post" class="edit-form hidden">
-                            <input type="number" name="weight" placeholder="New Weight" required>
-                            <button type="submit" class="save-button">Save</button>
-                        </form>
-                    </li>
-                {% endfor %}
-            </ul>
-            <form action="/save_template" method="post">
-                <input type="text" name="template_name" placeholder="Template name" required>
-                <button type="submit">Save Current Goals as Template</button>
-            </form>
-            <h2>Load Template</h2>
-            <ul>
-                {% for template in templates %}
-                    <li>
-                        <span>{{ template[1] }}</span>
-                        <form action="/load_template/{{ template[0] }}" method="post" style="display:inline;">
-                            <button type="submit">Load</button>
-                        </form>
-                        <form action="/remove_template/{{ template[0] }}" method="post" style="display:inline;">
-                            <button type="submit">Remove</button>
-                        </form>
                     </li>
                 {% endfor %}
             </ul>
         </div>
     </div>
     <script>
-        function toggleOptions(goalId) {
-            const optionsDiv = document.getElementById(`options-${goalId}`);
-            optionsDiv.classList.toggle('hidden');
+        // Drag and Drop Functionality
+        const goalItems = document.querySelectorAll('.goal-item');
+        const dropColumns = document.querySelectorAll('.drop-column');
+
+        goalItems.forEach(item => {
+            item.addEventListener('dragstart', handleDragStart);
+        });
+
+        dropColumns.forEach(column => {
+            column.addEventListener('dragover', handleDragOver);
+            column.addEventListener('drop', handleDrop);
+        });
+
+        function handleDragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.dataset.id);
+            e.dataTransfer.setData('text/weight', e.target.dataset.weight);
         }
 
-        function editGoal(goalId, currentWeight) {
-            const editForm = document.querySelector(`form[action="/edit_goal/${goalId}"]`);
-            editForm.querySelector('input[name="weight"]').value = currentWeight;
-            editForm.classList.remove('hidden');
+        function handleDragOver(e) {
+            e.preventDefault();
         }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const id = e.dataTransfer.getData('text/plain');
+            const weight = e.dataTransfer.getData('text/weight');
+            const goalItem = document.querySelector(`.goal-item[data-id='${id}']`);
+            e.target.appendChild(goalItem);
+            goalItem.dataset.column = e.target.id;
+        }
+
+        // Form Submission
+        const form = document.getElementById('decision-form');
+        form.addEventListener('submit', function(e) {
+            const scores = {};
+            document.querySelectorAll('.goal-item').forEach(item => {
+                scores[item.dataset.id] = item.dataset.column.replace('-column', '');
+            });
+            document.getElementById('scores').value = JSON.stringify(scores);
+        });
     </script>
 </body>
 </html>
