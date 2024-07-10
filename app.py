@@ -132,22 +132,27 @@ def add_decision():
     
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    c.execute('SELECT MAX(weight) FROM goals')
-    max_weight = c.fetchone()[0] if c.fetchone() else 1
+    c.execute('SELECT id, name, weight FROM goals')
+    goals = c.fetchall()
+    max_weight = max(goal[2] for goal in goals) if goals else 1
     
     total_score = 0
+    goal_impacts = []
     for goal_id, score in scores.items():
-        c.execute('SELECT weight FROM goals WHERE id = ?', (goal_id.split('_')[1],))
-        weight = c.fetchone()[0] if c.fetchone() else 0
+        goal_name = next((goal[1] for goal in goals if str(goal[0]) == goal_id.split('_')[1]), "Unknown Goal")
+        weight = next((goal[2] for goal in goals if str(goal[0]) == goal_id.split('_')[1]), 0)
         score_value = {'positive': 1, 'neutral': 0, 'negative': -1}[score]
-        total_score += (weight / max_weight) * score_value
-    
+        impact_score = weight * score_value
+        total_score += impact_score
+        goal_impacts.append((goal_name, impact_score))
+
     c.execute('INSERT INTO decisions (name, timestamp, total_score) VALUES (?, ?, ?)', (decision_name, timestamp, total_score))
     conn.commit()
     conn.close()
     
-    # Redirect to index with the result to be displayed
-    return redirect(url_for('index', result=total_score))
+    # Redirect to a new template that will display the chart and decision confirmation
+    return render_template('decision_chart.html', decision_name=decision_name, timestamp=timestamp, goal_impacts=goal_impacts, total_score=total_score)
+
 
 
 @app.route('/save_template', methods=['POST'])
