@@ -166,10 +166,12 @@ input[type="range"]::-moz-range-thumb {
                 {% endfor %}
                 <button type="submit">Weigh Decision</button>
             </form>
-            {% if result is not none %}
-                <div class="result">
-                    <strong>Decision Score:</strong> {{ result }}
-                </div>
+            {% if last_decision %}
+            <div class="result">
+                <h1>Latest Decision: {{ last_decision[1] }}</h1>
+                <p>Score: {{ last_decision[3] }}</p>
+                <p>Made on: {{ last_decision[2] }}</p>
+            </div>
             {% endif %}
         </div>
         <div class="container" id="goals">
@@ -190,7 +192,10 @@ input[type="range"]::-moz-range-thumb {
                                        oninput="updateWeightDisplay(this.value, '{{ goal[0] }}')"
                                        onchange="submitWeightChange(this.form)">
                                 <span id="display-{{ goal[0] }}">{{ goal[2] }}</span>
-                                <button type="submit" class="save-button">Save</button>
+                    
+                            </form>
+                            <form action="{{ url_for('archive_goal', goal_id=goal[0]) }}" method="post">
+                                <button type="submit">Archive</button>
                             </form>
                         </li>
                     {% endfor %}

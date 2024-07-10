@@ -1,11 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for,flash
 import sqlite3
 from datetime import datetime
 
 app = Flask(__name__)
 
 def init_db():
-    # Initialize main database
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     c.execute('''
@@ -40,21 +39,6 @@ def init_db():
             FOREIGN KEY (template_id) REFERENCES templates (id)
         )
     ''')
-
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS archived_goals (
-            id INTEGER PRIMARY KEY,
-            name TEXT NOT NULL,
-            weight INTEGER NOT NULL,
-            timestamp TEXT NOT NULL
-        )
-    ''')
-    conn.commit()
-    conn.close()
-
-    # Initialize archived goals database
-    conn = sqlite3.connect('archived_goals.db')
-    c = conn.cursor()
     c.execute('''
         CREATE TABLE IF NOT EXISTS archived_goals (
             id INTEGER PRIMARY KEY,
@@ -123,23 +107,21 @@ def edit_goal(goal_id):
 def archive_goal(goal_id):
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    c.execute('SELECT name, weight, timestamp FROM goals WHERE id = ?', (goal_id,))
-    goal = c.fetchone()
-    goal_name, goal_weight, goal_timestamp = goal
-    conn.close()
-
-    conn = sqlite3.connect('archived_goals.db')
-    c = conn.cursor()
-    c.execute('INSERT INTO archived_goals (name, weight, timestamp) VALUES (?, ?, ?)', (goal_name, goal_weight, goal_timestamp))
-    conn.commit()
-    conn.close()
-
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
-    c.execute('DELETE FROM goals WHERE id = ?', (goal_id,))
-    conn.commit()
-    conn.close()
-
+    try:
+        c.execute('SELECT name, weight, timestamp FROM goals WHERE id = ?', (goal_id,))
+        goal = c.fetchone()
+        if goal:
+            c.execute('INSERT INTO archived_goals (name, weight, timestamp) VALUES (?, ?, ?)', goal)
+            c.execute('DELETE FROM goals WHERE id = ?', (goal_id,))
+            conn.commit()
+        else:
+            flash('Goal not found')
+    except Exception as e:
+        conn.rollback()
+        flash('Error archiving the goal')
+        print(e)  # Or log the error appropriately
+    finally:
+        conn.close()
     return redirect(url_for('index'))
 
 @app.route('/add_decision', methods=['POST'])
@@ -217,6 +199,7 @@ def get_goals():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     c.execute('SELECT * FROM goals')
+
     goals = c.fetchall()
     conn.close()
     return goals
