@@ -26,12 +26,8 @@
                 datasets: [{
                     label: 'Impact Score',
                     data: {{ goal_impacts|map(attribute='1')|list|tojson }},
-                    backgroundColor: [
-                        'rgba(54, 162, 235, 0.2)'
-                    ],
-                    borderColor: [
-                        'rgba(54, 162, 235, 1)'
-                    ],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 1
                 }]
             },
@@ -40,9 +36,23 @@
                     y: {
                         beginAtZero: true
                     }
+                },
+                plugins: {
+                    tooltip: {
+                        enabled: true,
+                        bodyFont: {
+                            weight: 'bold'
+                        },
+                        callbacks: {
+                            label: function(context) {
+                                return context.chart.data.labels[context.dataIndex] + ': ' + context.parsed.y;
+                            }
+                        }
+                    }
                 }
             }
         });
     </script>
+    
 </body>
 </html>
