@@ -1,45 +1,48 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Decision Result</title>
+    <meta charset="UTF-8">
+    <title>Decision Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <h1>Decision Made: {{ decision_name }}</h1>
-    <h2>Total Score: {{ total_score }}</h2>
-    <p>Decision Timestamp: {{ timestamp }}</p>
-    <div>
-        <canvas id="impactChart" width="400" height="400"></canvas>
+    <div class="container">
+        <h1>Decision Made: {{ decision_name }}</h1>
+        <h2>Total Score: {{ total_score }}</h2>
+        <p>Decision Timestamp: {{ timestamp }}</p>
+        <div style="width:75%;">
+            <canvas id="decisionChart"></canvas>
+        </div>
+        <a href="{{ url_for('index') }}">Back to Home</a>
     </div>
+
     <script>
-        var ctx = document.getElementById('impactChart').getContext('2d');
-        var impactChart = new Chart(ctx, {
+        var ctx = document.getElementById('decisionChart').getContext('2d');
+        var chart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: {{ goal_impacts|map(attribute='0')|list|tojson }},
                 datasets: [{
-                    label: 'Goal Impact',
+                    label: 'Impact Score',
                     data: {{ goal_impacts|map(attribute='1')|list|tojson }},
                     backgroundColor: [
-                        {% for goal in goal_impacts %}
-                        '{{ 'green' if goal[1] > 0 else 'red' if goal[1] < 0 else 'gray' }}',
-                        {% endfor %}
+                        'rgba(54, 162, 235, 0.2)'
                     ],
-                    borderColor: 'black',
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)'
+                    ],
                     borderWidth: 1
                 }]
             },
             options: {
                 scales: {
                     y: {
-                        beginAtZero: true,
-                        suggestedMin: -100,
-                        suggestedMax: 100
+                        beginAtZero: true
                     }
                 }
             }
         });
     </script>
-    <a href="{{ url_for('index') }}">Back to Home</a>
 </body>
 </html>
