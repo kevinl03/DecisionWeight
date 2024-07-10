@@ -69,9 +69,13 @@ def init_db():
 @app.route('/')
 def index():
     goals = get_goals()
-    decisions = get_decisions()
+    last_decision = get_decisions()  # This fetches only the most recent decision
     templates = get_templates()
-    return render_template('index.html', goals=goals, decisions=decisions, templates=templates, result=None)
+    if last_decision:
+        result = last_decision[3]  # Assuming the score is in the fourth column
+    else:
+        result = None
+    return render_template('index.html', goals=goals, last_decision=last_decision, templates=templates, result=result)
 
 @app.route('/archived')
 def archived():
@@ -147,12 +151,12 @@ def add_decision():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     c.execute('SELECT MAX(weight) FROM goals')
-    max_weight = c.fetchone()[0]
+    max_weight = c.fetchone()[0] if c.fetchone() else 1
     
     total_score = 0
     for goal_id, score in scores.items():
         c.execute('SELECT weight FROM goals WHERE id = ?', (goal_id.split('_')[1],))
-        weight = c.fetchone()[0]
+        weight = c.fetchone()[0] if c.fetchone() else 0
         score_value = {'positive': 1, 'neutral': 0, 'negative': -1}[score]
         total_score += (weight / max_weight) * score_value
     
@@ -160,7 +164,9 @@ def add_decision():
     conn.commit()
     conn.close()
     
-    return redirect(url_for('index'))
+    # Redirect to index with the result to be displayed
+    return redirect(url_for('index', result=total_score))
+
 
 @app.route('/save_template', methods=['POST'])
 def save_template():
@@ -226,10 +232,10 @@ def get_archived_goals():
 def get_decisions():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    c.execute('SELECT * FROM decisions')
-    decisions = c.fetchall()
+    c.execute('SELECT * FROM decisions ORDER BY timestamp DESC LIMIT 1')  # Get the most recent decision
+    decision = c.fetchone()
     conn.close()
-    return decisions
+    return decision  # Return only the most recent decision
 
 def get_previous_decisions():
     conn = sqlite3.connect('database.db')
