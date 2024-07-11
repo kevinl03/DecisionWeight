@@ -144,6 +144,7 @@ input[type="range"]::-moz-range-thumb {
     cursor: pointer;
 }
 
+
     </style>
 </head>
 <body>
@@ -179,10 +180,17 @@ input[type="range"]::-moz-range-thumb {
                 <form action="/add_goal" method="post">
                     <input type="text" name="name" placeholder="Goal name" required>
                     <!-- Change weight input to a slider -->
-                    <input type="range" name="weight" min="1" max="10" value="5" oninput="this.nextElementSibling.value = this.value">
+                    <input type="range" class="colorful-slider" name="weight" min="1" max="10" value="5" oninput="this.nextElementSibling.value = this.value">
                     <output>5</output>
                     <button type="submit">Add Goal</button>
                 </form>
+                <script>
+                    document.querySelector('.colorful-slider').addEventListener('input', function() {
+                        var value = ((this.value-this.min)/(this.max-this.min))*100;
+                        this.style.background = 'linear-gradient(to right, blue, green ' + value + '%, white)';
+                    });
+                    </script>
+                    
                 <ul>
                     {% for goal in goals %}
                         <li class="goal-widget">
@@ -210,6 +218,7 @@ input[type="range"]::-moz-range-thumb {
                     form.submit();
                 }
                 </script>
+                
                 
             <form action="/save_template" method="post">
                 <input type="text" name="template_name" placeholder="Template name" required>
