@@ -179,8 +179,8 @@ input[type="range"]::-moz-range-thumb {
                 <form action="/add_goal" method="post">
                     <input type="text" name="name" placeholder="Goal name" required>
                     <!-- Change weight input to a slider -->
-                    <input type="range" name="weight" min="0" max="100" value="50" oninput="this.nextElementSibling.value = this.value">
-                    <output>50</output>
+                    <input type="range" name="weight" min="1" max="10" value="5" oninput="this.nextElementSibling.value = this.value">
+                    <output>5</output>
                     <button type="submit">Add Goal</button>
                 </form>
                 <ul>
@@ -188,7 +188,7 @@ input[type="range"]::-moz-range-thumb {
                         <li class="goal-widget">
                             <span>{{ goal[1] }} (Current Weight: {{ goal[2] }})</span>
                             <form action="/edit_goal/{{ goal[0] }}" method="post" class="edit-form">
-                                <input type="range" name="weight" min="0" max="100" value="{{ goal[2] }}"
+                                <input type="range" name="weight" min="1" max="10" value="{{ goal[2] }}"
                                        oninput="updateWeightDisplay(this.value, '{{ goal[0] }}')"
                                        onchange="submitWeightChange(this.form)">
                                 <span id="display-{{ goal[0] }}">{{ goal[2] }}</span>
