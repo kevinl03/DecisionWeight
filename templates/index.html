@@ -114,7 +114,7 @@
             font-size: 18px;
             color: #333;
         }
-        input[type="range"] {
+input[type="range"] {
     -webkit-appearance: none;
     width: 100%;
     height: 15px;
@@ -142,6 +142,33 @@ input[type="range"]::-moz-range-thumb {
     border-radius: 50%;
     background: #4CAF50;
     cursor: pointer;
+}
+input[type="range"].weight-slider {
+    -webkit-appearance: none; /* Override default appearance */
+    width: 100%; /* Specified width */
+    height: 10px; /* Slider thickness */
+    background: linear-gradient(to right, blue, green); /* Gradient from blue to green */
+    outline: none; /* Removes the outline */
+    opacity: 0.7; /* Partial transparency */
+    transition: background 0.2s ease-in-out; /* Smooth transition for background color */
+}
+
+input[type="range"].weight-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Remove default style */
+    appearance: none;
+    width: 25px; /* Set the handle size */
+    height: 25px; /* Set the handle size */
+    border-radius: 50%; /* Circular handle */
+    background: white; /* Handle color */
+    cursor: pointer; /* Cursor on hover */
+}
+
+input[type="range"].weight-slider::-moz-range-thumb {
+    width: 25px; /* Handle size for Firefox */
+    height: 25px; /* Handle size for Firefox */
+    border-radius: 50%; /* Circular handle for Firefox */
+    background: white; /* Handle color for Firefox */
+    cursor: pointer; /* Cursor on hover for Firefox */
 }
 
 
@@ -190,32 +217,41 @@ input[type="range"]::-moz-range-thumb {
                         this.style.background = 'linear-gradient(to right, blue, green ' + value + '%, white)';
                     });
                     </script>
-                    
-                <ul>
-                    {% for goal in goals %}
+                    <ul>
+                        {% for goal in goals %}
                         <li class="goal-widget">
                             <span>{{ goal[1] }} (Current Weight: {{ goal[2] }})</span>
                             <form action="/edit_goal/{{ goal[0] }}" method="post" class="edit-form">
                                 <input type="range" name="weight" min="1" max="10" value="{{ goal[2] }}"
-                                       oninput="updateWeightDisplay(this.value, '{{ goal[0] }}')"
-                                       onchange="submitWeightChange(this.form)">
+                                        oninput="updateWeightDisplay(this.value, '{{ goal[0] }}');"
+                                        class="weight-slider"
+                                        onchange="submitWeightChange(this.form)">
                                 <span id="display-{{ goal[0] }}">{{ goal[2] }}</span>
-                    
                             </form>
                             <form action="{{ url_for('archive_goal', goal_id=goal[0]) }}" method="post">
                                 <button type="submit">Archive</button>
                             </form>
                         </li>
-                    {% endfor %}
-                </ul>
+                        {% endfor %}
+                    </ul>
+                    
                 
                 <script>
-                function updateWeightDisplay(value, goalId) {
+               function updateWeightDisplay(value, goalId) {
+                    const slider = document.querySelector(`input[name='weight'][value='${value}']`);
+                    const normalizedValue = value / 10; // Normalize value between 0 and 1
+                    slider.style.background = `linear-gradient(to right, blue, green ${normalizedValue * 100}%)`; // Adjust the gradient dynamically
                     document.getElementById('display-' + goalId).textContent = value;
-                }
+                    }
                 
                 function submitWeightChange(form) {
                     form.submit();
+                }
+
+                function applyGradient(element, goalId) {
+                        var intensity = element.value / 10; // Assuming max weight is 10
+                        var goalElement = element.closest('.goal-widget');
+                        goalElement.style.backgroundColor = `rgba(0, 0, 255, ${intensity})`; // Gradient from blue to green
                 }
                 </script>
                 
