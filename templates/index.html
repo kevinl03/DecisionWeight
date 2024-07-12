@@ -143,7 +143,26 @@ input[type="range"].weight-slider::-moz-range-thumb {
     cursor: pointer;
 }
 
+input[type=range] {
+    width: 300px; /* Adjust as per your UI requirements */
+}
 
+input[type=range]::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px; /* Set to your desired width */
+    height: 20px; /* Set to your desired height */
+    background: black; /* Set to your desired thumb color */
+    cursor: pointer;
+    border-radius: 50%; /* Circular thumb */
+}
+
+input[type=range]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: black;
+    cursor: pointer;
+    border-radius: 50%;
+}
     </style>
 </head>
 <body>
@@ -157,15 +176,37 @@ input[type="range"].weight-slider::-moz-range-thumb {
                 {% for goal in goals %}
                     <div class="goal-widget">
                         <span>{{ goal[1] }} (Weight: {{ goal[2] }})</span>
-                        <select id="score_{{ goal[0] }}" name="score_{{ goal[0] }}" required>
-                            <option value="positive">Positive</option>
-                            <option value="neutral">Neutral</option>
-                            <option value="negative">Negative</option>
-                        </select>
+                        <input type="range" id="decisionSlider{{ loop.index }}" name="decision{{ loop.index }}" min="0" max="2" value="1" step="1">
+                        <output id="decisionOutput{{ loop.index }}">Neutral</output>
                     </div>
                 {% endfor %}
                 <button type="submit">Weigh Decision</button>
             </form>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    var sliders = document.querySelectorAll('input[type="range"]');
+                    sliders.forEach(function(slider, index) {
+                        slider.addEventListener('input', function() {
+                            const value = parseInt(this.value);
+                            let label = '';
+                            switch(value) {
+                                case 0:
+                                    label = 'Negative';
+                                    break;
+                                case 1:
+                                    label = 'Neutral';
+                                    break;
+                                case 2:
+                                    label = 'Positive';
+                                    break;
+                            }
+                            document.getElementById('decisionOutput' + (index + 1)).textContent = label;
+                        });
+                    });
+                });
+            </script>
+            
+            
             {% if last_decision %}
             <div class="result">
                 <h1>Latest Decision: {{ last_decision[1] }}</h1>
