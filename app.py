@@ -141,7 +141,7 @@ def add_decision():
     for goal_id, score in scores.items():
         goal_name = next((goal[1] for goal in goals if str(goal[0]) == goal_id.split('_')[1]), "Unknown Goal")
         weight = next((goal[2] for goal in goals if str(goal[0]) == goal_id.split('_')[1]), 0)
-        score_value = {'positive': 1, 'neutral': 0, 'negative': -1}[score]
+        score_value = float(score)  # since score is a numeric value between -1 and 1
         impact_score = weight * score_value
         total_score += impact_score
         goal_impacts.append((goal_name, impact_score))

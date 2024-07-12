@@ -11,3 +11,11 @@ body {
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     text-align: center;
 }
+.decision-slider {
+    width: 100%; /* Ensures the slider takes up the full width available */
+    background: linear-gradient(to right, red, yellow, green); /* Visual gradient from negative (red) to neutral (yellow) to positive (green) */
+}
+
+.output {
+    font-weight: bold; /* Make the output text bold */
+}

@@ -163,6 +163,36 @@ input[type=range]::-moz-range-thumb {
     cursor: pointer;
     border-radius: 50%;
 }
+input[type="range"] {
+    -webkit-appearance: none; /* Override default CSS styles */
+    appearance: none;
+    width: 100%; /* Slider takes full width of its container */
+    background: transparent; /* No background */
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px; /* Width of the thumb */
+    height: 20px; /* Height of the thumb */
+    background: #4CAF50; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+    border-radius: 10px; /* Circular edges */
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #4CAF50;
+    cursor: pointer;
+    border-radius: 10px;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+    height: 5px; /* Slider track height */
+    background: linear-gradient(to right, #0000FF, #008000); /* Gradient from blue to green */
+}
+
     </style>
 </head>
 <body>
@@ -175,36 +205,27 @@ input[type=range]::-moz-range-thumb {
                 <input type="text" name="name" placeholder="Decision name" required>
                 {% for goal in goals %}
                     <div class="goal-widget">
-                        <span>{{ goal[1] }} (Weight: {{ goal[2] }})</span>
-                        <input type="range" id="decisionSlider{{ loop.index }}" name="decision{{ loop.index }}" min="0" max="2" value="1" step="1">
-                        <output id="decisionOutput{{ loop.index }}">Neutral</output>
+                        <span>{{ goal[1] }}</span> <!-- Goal name -->
+                        <div>
+                            <label for="score_{{ goal[0] }}">Impact Score: </label>
+                            <input type="range" id="score_{{ goal[0] }}" name="score_{{ goal[0] }}" min="-1" max="1" value="0" step="0.01" class="decision-slider">
+                            <output id="output_{{ goal[0] }}">0</output>
+                        </div>
                     </div>
                 {% endfor %}
                 <button type="submit">Weigh Decision</button>
             </form>
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
-                    var sliders = document.querySelectorAll('input[type="range"]');
-                    sliders.forEach(function(slider, index) {
+                    document.querySelectorAll('.decision-slider').forEach(function(slider) {
                         slider.addEventListener('input', function() {
-                            const value = parseInt(this.value);
-                            let label = '';
-                            switch(value) {
-                                case 0:
-                                    label = 'Negative';
-                                    break;
-                                case 1:
-                                    label = 'Neutral';
-                                    break;
-                                case 2:
-                                    label = 'Positive';
-                                    break;
-                            }
-                            document.getElementById('decisionOutput' + (index + 1)).textContent = label;
+                            const outputElement = document.getElementById('output_' + this.id.substring(6)); // Assumes your id is 'score_X'
+                            outputElement.value = parseFloat(this.value).toFixed(2); // Updates the output with the slider's value, formatted to 2 decimal places
                         });
                     });
                 });
             </script>
+                
             
             
             {% if last_decision %}
