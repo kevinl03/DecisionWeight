@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+
+    sitr-api:
+        image: ${{ secrets.SITR_API_QA_URI_DOCKER_IMG }}
+        container_name: sitr-api-qa
+        environment:
+            - ASPNETCORE_ENVIRONMENT=QA
+        ports:
+            - "5000:80"
+        volumes:
+            - "./Host-Logs:/app/App_Data/Logs"
+
+    sitr-app:
+        image: ${{ secrets.SITR_APP_QA_URI_DOCKER_IMG }}
+        container_name: sitr-app-qa
+        ports:
+            - "9902:80"
+    
+    sitr-nginx: 
+        image: ${{ secrets.SITR_NGINX_QA_URI_DOCKER_IMG }}
+        container_name: sitr-nginx-qa
+        depends_on: 
+          - sitr-app
+          - sitr-api
+        ports: 
+          - "80:80"
