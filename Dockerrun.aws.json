@@ -1,7 +1,7 @@
 {
     "AWSEBDockerrunVersion": "1",
     "Image": {
-      "Name": "your-dockerhub-username/your-app-name",
+      "Name": "${SITR_API_QA_URI_DOCKER_IMG}",
       "Update": "true"
     },
     "Ports": [
