@@ -1,0 +1,13 @@
+{
+    "AWSEBDockerrunVersion": "1",
+    "Image": {
+      "Name": "${SITR_API_QA_URI_DOCKER_IMG}$",
+      "Update": "true"
+    },
+    "Ports": [
+      {
+        "ContainerPort": "8080"
+      }
+    ]
+  }
+  
