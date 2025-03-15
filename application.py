@@ -50,7 +50,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-@app.route('/')
+@application.route('/')
 def index():
     goals = get_goals()
     last_decision = get_decisions()  # This fetches only the most recent decision
@@ -61,17 +61,17 @@ def index():
         result = None
     return render_template('index.html', goals=goals, last_decision=last_decision, templates=templates, result=result)
 
-@app.route('/archived')
+@application.route('/archived')
 def archived():
     archived_goals = get_archived_goals()
     return render_template('archived.html', archived_goals=archived_goals)
 
-@app.route('/previous_decisions')
+@application.route('/previous_decisions')
 def previous_decisions():
     decisions = get_previous_decisions()
     return render_template('previous_decisions.html', decisions=decisions)
 
-@app.route('/add_goal', methods=['POST'])
+@application.route('/add_goal', methods=['POST'])
 def add_goal():
     name = request.form['name']
     weight = request.form['weight']  # This captures the integer value from the slider
@@ -83,7 +83,7 @@ def add_goal():
     conn.close()
     return redirect(url_for('index'))
 
-@app.route('/edit_goal/<int:goal_id>', methods=['POST'])
+@application.route('/edit_goal/<int:goal_id>', methods=['POST'])
 def edit_goal(goal_id):
     new_weight = request.form['weight']
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -103,7 +103,7 @@ def edit_goal(goal_id):
     
     return redirect(url_for('index'))
 
-@app.route('/archive_goal/<int:goal_id>', methods=['POST'])
+@application.route('/archive_goal/<int:goal_id>', methods=['POST'])
 def archive_goal(goal_id):
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
@@ -124,7 +124,7 @@ def archive_goal(goal_id):
         conn.close()
     return redirect(url_for('index'))
 
-@app.route('/add_decision', methods=['POST'])
+@application.route('/add_decision', methods=['POST'])
 def add_decision():
     decision_name = request.form['name']
     scores = {key: value for key, value in request.form.items() if key.startswith('score_')}
@@ -155,7 +155,7 @@ def add_decision():
 
 
 
-@app.route('/save_template', methods=['POST'])
+@application.route('/save_template', methods=['POST'])
 def save_template():
     template_name = request.form['template_name']
     conn = sqlite3.connect('database.db')
@@ -172,7 +172,7 @@ def save_template():
     conn.close()
     return redirect(url_for('index'))
 
-@app.route('/load_template/<int:template_id>', methods=['POST'])
+@application.route('/load_template/<int:template_id>', methods=['POST'])
 def load_template(template_id):
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
@@ -190,7 +190,7 @@ def load_template(template_id):
     conn.close()
     return redirect(url_for('index'))
 
-@app.route('/remove_template/<int:template_id>', methods=['POST'])
+@application.route('/remove_template/<int:template_id>', methods=['POST'])
 def remove_template(template_id):
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
@@ -242,5 +242,4 @@ def get_templates():
     return templates
 
 if __name__ == '__main__':
-    init_db()
     application.run(debug=True)
