@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for,flash
 import sqlite3
 from datetime import datetime
 
-app = Flask(__name__)
+application = Flask(__name__)
 
 def init_db():
     conn = sqlite3.connect('database.db')
